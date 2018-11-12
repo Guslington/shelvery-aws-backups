@@ -39,6 +39,9 @@ class RuntimeConfig:
     shelvery_source_aws_account_ids - AWS Account Ids that are sharing shelvery backups with AWS Account shelvery
                                     is running in. Used for 'pull backups' feature
 
+    shelvery_bucket_name_template - Template used to create bucket name. Available keys: `{account_id}`, `{region}`.
+                                    Defaults to `shelvery.data.{account_id}-{region}.base2tools`
+
     shelvery_select_entity - Filter which entities get backed up, regardless of tags
 
     shelvery_sns_topic - SNS Topics for shelvery notifications
@@ -74,6 +77,7 @@ class RuntimeConfig:
         'shelvery_share_aws_account_ids': None,
         'shelvery_redshift_backup_mode': REDSHIFT_COPY_AUTOMATED_SNAPSHOT,
         'shelvery_select_entity': None,
+        'shelvery_bucket_name_template': 'shelvery.data.{account_id}-{region}.base2tools',
         'boto3_retries': 10,
         'role_arn': None,
         'role_external_id': None,
@@ -259,6 +263,10 @@ class RuntimeConfig:
         return cls.get_conf_value('role_external_id', None, engine.lambda_payload)
 
     @classmethod
+    def get_bucket_name_template(cls, engine):
+        return cls.get_conf_value('shelvery_bucket_name_template', None, engine.lambda_payload)
+
+    @classmethod
     def copy_resource_tags(cls, engine) -> bool:
         copy_tags = cls.get_conf_value('shelvery_copy_resource_tags', None, engine.lambda_payload)
         if copy_tags or copy_tags.lower() == 'true' or copy_tags == 0:
@@ -273,3 +281,5 @@ class RuntimeConfig:
         if exclude is not None:
             keys += exclude.split(',')
         return keys
+
+
